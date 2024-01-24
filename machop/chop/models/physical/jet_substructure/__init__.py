@@ -5,6 +5,25 @@ Jet Substructure Models used in the LogicNets paper
 import torch.nn as nn
 
 
+class JSC_bardia(nn.Module):
+    def __init__(self, info):
+        super(JSC_bardia, self).__init__()
+        self.seq_blocks = nn.Sequential(
+            nn.BatchNorm1d(16),  
+            nn.ReLU(16),  # 1
+            nn.Linear(16, 64),  
+            nn.ReLU(64),
+            nn.Linear(64, 32),  
+            nn.ReLU(32),  # 1
+            nn.Linear(32, 16),  
+            nn.ReLU(16),  # 1
+            nn.Linear(16, 5),  
+            nn.ReLU(5),  # 4
+        )
+
+    def forward(self, x):
+        return self.seq_blocks(x)
+    
 class JSC_Toy(nn.Module):
     def __init__(self, info):
         super(JSC_Toy, self).__init__()
@@ -83,6 +102,10 @@ class JSC_S(nn.Module):
 
 
 # Getters ------------------------------------------------------------------------------
+    
+def get_jsc_bardia(info):
+    return JSC_bardia(info)
+
 def get_jsc_toy(info):
     # TODO: Tanh is not supported by mase yet
     return JSC_Toy(info)

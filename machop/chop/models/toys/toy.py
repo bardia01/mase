@@ -5,7 +5,7 @@ A collection of toy models for testing and development runs.
 import torch.nn as nn
 from typing import Any
 
-
+  
 class ToyNet(nn.Module):
     def __init__(self, image_size, num_classes):
         super(ToyNet, self).__init__()

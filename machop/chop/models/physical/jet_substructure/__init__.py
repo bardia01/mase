@@ -6,18 +6,27 @@ import torch.nn as nn
 
 
 class JSC_bardia(nn.Module):
+    #2128 weights
     def __init__(self, info):
         super(JSC_bardia, self).__init__()
         self.seq_blocks = nn.Sequential(
             nn.BatchNorm1d(16),  
             nn.ReLU(16),  # 1
-            nn.Linear(16, 64),  
-            nn.ReLU(64),
-            nn.Linear(64, 32),  
-            nn.ReLU(32),  # 1
+            nn.Linear(16, 32),
+
+            nn.BatchNorm1d(32), 
+            nn.ReLU(32),
+            nn.Linear(32, 32),  
+
+            nn.BatchNorm1d(32), 
+            nn.ReLU(32),  #1
             nn.Linear(32, 16),  
+
+            nn.BatchNorm1d(16), 
             nn.ReLU(16),  # 1
             nn.Linear(16, 5),  
+
+            nn.BatchNorm1d(5), 
             nn.ReLU(5),  # 4
         )
 
@@ -25,12 +34,14 @@ class JSC_bardia(nn.Module):
         return self.seq_blocks(x)
     
 class JSC_Toy(nn.Module):
+    #200 weights
     def __init__(self, info):
         super(JSC_Toy, self).__init__()
         self.seq_blocks = nn.Sequential(
             # 1st LogicNets Layer
             nn.BatchNorm1d(16),  # input_quant       # 0
             nn.ReLU(16),  # 1
+            
             nn.Linear(16, 8),  # linear              # 2
             nn.BatchNorm1d(8),  # output_quant       # 3
             nn.ReLU(8),  # 4

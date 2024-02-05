@@ -88,8 +88,8 @@ class SearchStrategyOptuna(SearchStrategyBase):
             for name, length in search_space.choice_lengths_flattened.items():
                 sampled_indexes[name] = trial.suggest_int(name, 0, length - 1)
             sampled_config = search_space.flattened_indexes_to_config(sampled_indexes)
-            print("Sampled indexes - ",sampled_indexes)
-            print("Sampled config- ",sampled_config)
+            print("\nSampled indexes - ",sampled_indexes, "\n")
+            print("\nSampled config- ",sampled_config, "\n")
 
         is_eval_mode = self.config.get("eval_mode", True)
         model = search_space.rebuild_model(sampled_config, is_eval_mode)

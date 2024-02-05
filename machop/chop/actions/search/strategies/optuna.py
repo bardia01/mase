@@ -95,7 +95,9 @@ class SearchStrategyOptuna(SearchStrategyBase):
             print("\nSampled indexes - ",sampled_indexes, "\n")
             print("\nSampled config- ",sampled_config, "\n")
 
-        bardia_config = search_space.flattened_indexes_to_config(search_space.choices_flattened)
+        bardia_values = list(search_space.choices_flattened.values())
+        for combination in itertools.product(*bardia_values):
+            bardia_config = dict(zip(search_space.choices_flattened.keys(), combination))
         print("\nBardia config - ",bardia_config, "\n")
         is_eval_mode = self.config.get("eval_mode", True)
         model = search_space.rebuild_model(sampled_config, is_eval_mode)

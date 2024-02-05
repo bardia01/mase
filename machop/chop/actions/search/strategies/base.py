@@ -125,8 +125,7 @@ class SearchStrategyBase:
 #                 metrics |= runner(self.data_module, model, sampled_config)
 #         return metrics
 
-#     def objective(self, search_space):
-#         sampled_indexes = {}
+#     def objective(self, search_space, sampled_config, model, is_eval_mode: bool):
 
 #         software_metrics = self.compute_software_metrics(
 #             model, sampled_config, is_eval_mode
@@ -146,24 +145,18 @@ class SearchStrategyBase:
 #         else:
 #             return sum(scaled_metrics.values())
 
-#     def search(self, search_space) -> optuna.study.Study:
+#     def search(self, search_space) :
         
 #         if not self.sum_scaled_metrics:
 #             study_kwargs["directions"] = self.directions
 #         else:
 #             study_kwargs["direction"] = self.direction
-
-#         a = search_space.choice_lengths_flattened.items()
-#             # sampled_indexes[name] = trial.suggest_int(name, 0, length - 1)
-#         sampled_config = search_space.flattened_indexes_to_config(sampled_indexes)
+        
+#         sampled_config = search_space.flattened_indexes_to_config(search_space.choices_flattened)
 
 #         is_eval_mode = self.config.get("eval_mode", True)
 #         model = search_space.rebuild_model(sampled_config, is_eval_mode)
-#         # if isinstance(self.config["setup"].get("pkl_ckpt", None), str):
-#         #     study = joblib.load(self.config["setup"]["pkl_ckpt"])
-#         #     logger.info(f"Loaded study from {self.config['setup']['pkl_ckpt']}")
-#         # else:
-#         #     study = optuna.create_study(**study_kwargs)
+        
 
 #         study.optimize(
 #             func=partial(self.objective, search_space=search_space),
@@ -276,3 +269,4 @@ class SearchStrategyBase:
 #         )
 #         logger.info(f"Best trial(s):\n{txt}")
 #         return df
+# a

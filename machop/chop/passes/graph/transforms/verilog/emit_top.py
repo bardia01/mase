@@ -688,4 +688,5 @@ def emit_verilog_top_transform_pass(graph, pass_args={}):
     with open(top_file, "w") as top_design:
         top_design.write(top)
 
+    print(top_file)
     return graph, {}

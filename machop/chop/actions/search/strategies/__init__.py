@@ -1,7 +1,7 @@
 # from .rl import StrategyRL
 from .optuna import SearchStrategyOptuna
 from .base import SearchStrategyBase
-
+from .brute_force import brute_force
 
 SEARCH_STRATEGY_MAP = {
     # "rl": StrategyRL,

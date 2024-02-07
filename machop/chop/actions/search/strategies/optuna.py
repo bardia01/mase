@@ -4,6 +4,7 @@ import pandas as pd
 import logging
 from tabulate import tabulate
 import joblib
+import itertools
 
 from functools import partial
 from .base import SearchStrategyBase
@@ -88,17 +89,7 @@ class SearchStrategyOptuna(SearchStrategyBase):
             for name, length in search_space.choice_lengths_flattened.items():
                 sampled_indexes[name] = trial.suggest_int(name, 0, length - 1)
             sampled_config = search_space.flattened_indexes_to_config(sampled_indexes)
-
-            print("\nChoices flattened - ",search_space.choices_flattened, "\n")
-            print("\nChoices flattened items - ",search_space.choices_flattened.items(), "\n")
-            print("\nChoices type - ",type(search_space.choices_flattened), "\n")
-            print("\nSampled indexes - ",sampled_indexes, "\n")
-            print("\nSampled config- ",sampled_config, "\n")
-
-        bardia_values = list(search_space.choices_flattened.values())
-        for combination in itertools.product(*bardia_values):
-            bardia_config = dict(zip(search_space.choices_flattened.keys(), combination))
-        print("\nBardia config - ",bardia_config, "\n")
+        
         is_eval_mode = self.config.get("eval_mode", True)
         model = search_space.rebuild_model(sampled_config, is_eval_mode)
 

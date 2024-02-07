@@ -5,6 +5,7 @@ import logging
 from tabulate import tabulate
 import joblib
 
+from itertools import product
 from functools import partial
 from .base import SearchStrategyBase
 
@@ -44,7 +45,7 @@ class brute_force(SearchStrategyBase):
         return metrics
 
     def objective(self, search_space, sampled_config, model, is_eval_mode: bool):
-
+        
         software_metrics = self.compute_software_metrics(
             model, sampled_config, is_eval_mode
         )
@@ -53,56 +54,94 @@ class brute_force(SearchStrategyBase):
         )
         metrics = software_metrics | hardware_metrics
         scaled_metrics = {}
+
+        
+
         for metric_name in self.metric_names:
             scaled_metrics[metric_name] = (
                 self.config["metrics"][metric_name]["scale"] * metrics[metric_name]
             )
 
-        if not self.sum_scaled_metrics:
-            return list(scaled_metrics.values())
-        else:
-            return sum(scaled_metrics.values())
+        if self.sum_scaled_metrics:
+            a = sum(scaled_metrics.values())
+            self.config["metrics"]['sum_scaled_metrics'] = {'scale': 1.0, 'direction': self.direction}
+            scaled_metrics["sum_scaled_metrics"] = a
+        
+        return scaled_metrics
 
     def search(self, search_space) :
         
-        if not self.sum_scaled_metrics:
-            study_kwargs["directions"] = self.directions
+        bardia_values = list(search_space.choices_flattened.values())
+        bardia_lengths = list(search_space.choice_lengths_flattened.values())
+        
+        bardia_indexes = []
+        for i in bardia_lengths:
+            bardia_indexes.append(list(range(i)))
+    
+        bardia_configs=[]
+        for combination in product(*bardia_indexes):
+            bardia_config = dict(zip(search_space.choices_flattened.keys(), combination))
+            bardia_configs.append(bardia_config)
+
+        perfs = []
+        score = 0 
+        for i in bardia_configs:
+            sampled_config = search_space.flattened_indexes_to_config(i)
+
+            is_eval_mode = self.config.get("eval_mode", True)
+            model = search_space.rebuild_model(sampled_config, is_eval_mode)
+            
+            score = self.objective(search_space, sampled_config, model, is_eval_mode)
+            perfs.append(sampled_config | score)
+        
+        perfs_df = pd.DataFrame(perfs)
+        perfs_df.to_csv(self.save_dir / "perfs.csv")
+
+        if(self.sum_scaled_metrics):
+            metric_columns = ['sum_scaled_metrics']
         else:
-            study_kwargs["direction"] = self.direction
+            metric_columns = self.metric_names
+
+        maximize = {metric: self.config["metrics"][metric]["direction"] == "maximize" for metric in metric_columns}
+        best_df = find_pareto_optimal_df(perfs_df, metric_columns, maximize)
         
-        sampled_config = search_space.flattened_indexes_to_config(search_space.choices_flattened)
-
-        is_eval_mode = self.config.get("eval_mode", True)
-        model = search_space.rebuild_model(sampled_config, is_eval_mode)
+        best_df.to_csv(self.save_dir / "best_perf.csv")
         
+        print(best_df)
+        return perfs_df
 
-        study.optimize(
-            func=partial(self.objective, search_space=search_space),
-            n_jobs=self.config["setup"]["n_jobs"],
-            n_trials=self.config["setup"]["n_trials"],
-            timeout=self.config["setup"]["timeout"],
-            callbacks=[
-                partial(
-                    callback_save_study,
-                    save_dir=self.save_dir,
-                    save_every_n_trials=self.config["setup"].get(
-                        "save_every_n_trials", 10
-                    ),
-                )
-            ],
-            show_progress_bar=True,
-        )
-        self._save_study(study, self.save_dir / "study.pkl")
-        self._save_search_dataframe(study, search_space, self.save_dir / "log.json")
-        self._save_best(study, self.save_dir / "best.json")
+def find_pareto_optimal_df(df, metric_columns, maximize):
+    """
+    Find the Pareto optimal rows from a DataFrame based on specified metric columns.
+    
+    :param df: A pandas DataFrame.
+    :param metric_columns: A list of column names representing the metrics.
+    :param maximize: A boolean or a dictionary indicating if the metrics should be maximized or minimized.
+                     If it's a boolean, it applies to all metrics. If it's a dictionary, it specifies
+                     the behavior for each metric column.
+    :return: A DataFrame with Pareto optimal rows.
+    """
+    if isinstance(maximize, bool):
+        maximize = {metric: maximize for metric in metric_columns}
 
-        for i in search_space.choices_flattened:
-            best_model 
-        return study
+    def is_dominated(row, other_row):
+        for metric in metric_columns:
+            if (maximize[metric] and row[metric] < other_row[metric]) or (not maximize[metric] and row[metric] > other_row[metric]):
+                return False
+        return True
 
+    pareto_optimal_indices = []
+    for idx, row in df.iterrows():
+        if not any(is_dominated(row, df.loc[other_idx]) for other_idx in df.index if other_idx != idx):
+            pareto_optimal_indices.append(idx)
+    
+    return df.loc[pareto_optimal_indices]
+
+
+        
     @staticmethod
-    def _save_search_dataframe(study: optuna.study.Study, search_space, save_path):
-        df = study.trials_dataframe(
+    def _save_search_DataFrame(study: optuna.study.Study, search_space, save_path):
+        df = study.trials_DataFrame(
             attrs=(
                 "number",
                 "value",

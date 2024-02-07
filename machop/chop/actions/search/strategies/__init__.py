@@ -6,6 +6,7 @@ from .brute_force import brute_force
 SEARCH_STRATEGY_MAP = {
     # "rl": StrategyRL,
     "optuna": SearchStrategyOptuna,
+    "brute_force": brute_force,
 }
 
 

@@ -11,6 +11,7 @@ from .search_space import get_search_space_cls
 from .strategies import get_search_strategy_cls
 from chop.tools.utils import device
 from chop.tools.utils import parse_accelerator
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -89,4 +90,8 @@ def search(
 
     logger.info("Search started...")
     # perform search and save the results
+
+    start = time.time()
     strategy.search(search_space)
+    end = time.time()
+    print("SEARCH TOOK ", end - start, " SECONDS")

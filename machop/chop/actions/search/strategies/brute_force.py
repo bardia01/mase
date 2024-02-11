@@ -105,7 +105,7 @@ class brute_force(SearchStrategyBase):
         maximize = {metric: self.config["metrics"][metric]["direction"] == "maximize" for metric in metric_columns}
         best_df = find_pareto_optimal_df(perfs_df, metric_columns, maximize)
         
-        best_df.to_csv(self.save_dir, "/best_perf.csv")
+        best_df.to_csv(self.save_dir / "best_perf.csv")
         
         print(self.save_dir)
         print(best_df)

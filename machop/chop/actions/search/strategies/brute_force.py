@@ -71,21 +71,21 @@ class brute_force(SearchStrategyBase):
 
     def search(self, search_space) :
         
-        bardia_values = list(search_space.choices_flattened.values())
-        bardia_lengths = list(search_space.choice_lengths_flattened.values())
+        brute_force_values = list(search_space.choices_flattened.values())
+        brute_force_lengths = list(search_space.choice_lengths_flattened.values())
         
-        bardia_indexes = []
-        for i in bardia_lengths:
-            bardia_indexes.append(list(range(i)))
+        brute_force_indexes = []
+        for i in brute_force_lengths:
+            brute_force_indexes.append(list(range(i)))
     
-        bardia_configs=[]
-        for combination in product(*bardia_indexes):
-            bardia_config = dict(zip(search_space.choices_flattened.keys(), combination))
-            bardia_configs.append(bardia_config)
+        brute_force_configs=[]
+        for combination in product(*brute_force_indexes):
+            brute_force_config = dict(zip(search_space.choices_flattened.keys(), combination))
+            brute_force_configs.append(brute_force_config)
 
         perfs = []
         score = 0 
-        for i in bardia_configs:
+        for i in brute_force_configs:
             sampled_config = search_space.flattened_indexes_to_config(i)
 
             is_eval_mode = self.config.get("eval_mode", True)
@@ -111,16 +111,7 @@ class brute_force(SearchStrategyBase):
         return perfs_df
 
 def find_pareto_optimal_df(df, metric_columns, maximize):
-    """
-    Find the Pareto optimal rows from a DataFrame based on specified metric columns.
-    
-    :param df: A pandas DataFrame.
-    :param metric_columns: A list of column names representing the metrics.
-    :param maximize: A boolean or a dictionary indicating if the metrics should be maximized or minimized.
-                     If it's a boolean, it applies to all metrics. If it's a dictionary, it specifies
-                     the behavior for each metric column.
-    :return: A DataFrame with Pareto optimal rows.
-    """
+
     if isinstance(maximize, bool):
         maximize = {metric: maximize for metric in metric_columns}
 

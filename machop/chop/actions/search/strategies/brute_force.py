@@ -127,5 +127,5 @@ def find_pareto_optimal_df(df, metric_columns, maximize):
     for idx, row in df.iterrows():
         if not any(is_dominated(row, df.loc[other_idx]) for other_idx in df.index if other_idx != idx):
             pareto_optimal_indices.append(idx)
-    
+    logger.info(f"Found {len(pareto_optimal_indices)} pareto optimal configurations")
     return df.loc[pareto_optimal_indices]

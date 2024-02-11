@@ -8,6 +8,7 @@ import joblib
 from itertools import product
 from functools import partial
 from .base import SearchStrategyBase
+logger = logging.getLogger(__name__)
 
 class brute_force(SearchStrategyBase):
     def _post_init_setup(self):

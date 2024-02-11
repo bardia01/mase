@@ -119,7 +119,7 @@ def find_pareto_optimal_df(df, metric_columns, maximize):
 
     def is_dominated(row, other_row):
         for metric in metric_columns:
-            if (maximize[metric] and row[metric] < other_row[metric]) or (not maximize[metric] and row[metric] > other_row[metric]):
+            if (maximize[metric] and (row[metric] > other_row[metric])) or (not maximize[metric] and row[metric] < other_row[metric]):
                 return False
         return True
 

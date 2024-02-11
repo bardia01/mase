@@ -110,40 +110,6 @@ class brute_force(SearchStrategyBase):
         print(self.save_dir)
         print(best_df)
 
-        # txt = "Best trial(s):\n"
-        # df_truncated = best_df.loc[
-        #     :, ["number", "software_metrics", "hardware_metrics", "scaled_metrics"]
-        # ]
-
-        # def beautify_metric(metric: dict):
-        #     beautified = {}
-        #     for k, v in metric.items():
-        #         if isinstance(v, (float, int)):
-        #             beautified[k] = round(v, 3)
-        #         else:
-        #             txt = str(v)
-        #             if len(txt) > 20:
-        #                 txt = txt[:20] + "..."
-        #             else:
-        #                 txt = txt[:20]
-        #             beautified[k] = txt
-        #     return beautified
-
-        # df_truncated.loc[
-        #     :, ["software_metrics", "hardware_metrics", "scaled_metrics"]
-        # ] = df_truncated.loc[
-        #     :, ["software_metrics", "hardware_metrics", "scaled_metrics"]
-        # ].map(
-        #     beautify_metric
-        # )
-        # txt += tabulate(
-        #     df_truncated,
-        #     headers="keys",
-        #     tablefmt="orgtbl",
-        # )
-        # logger.info(f"Best trial(s):\n{txt}")
-        return df
-    
         return perfs_df
 
 def find_pareto_optimal_df(df, metric_columns, maximize):
